@@ -14,7 +14,158 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      appointments: {
+        Row: {
+          appointment_date: string
+          client_name: string
+          created_at: string
+          duration: number
+          id: string
+          price: number
+          professional_id: string
+          service_name: string
+          start_time: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          appointment_date?: string
+          client_name: string
+          created_at?: string
+          duration: number
+          id?: string
+          price?: number
+          professional_id: string
+          service_name: string
+          start_time: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          appointment_date?: string
+          client_name?: string
+          created_at?: string
+          duration?: number
+          id?: string
+          price?: number
+          professional_id?: string
+          service_name?: string
+          start_time?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "appointments_professional_id_fkey"
+            columns: ["professional_id"]
+            isOneToOne: false
+            referencedRelation: "professionals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      products: {
+        Row: {
+          category: string
+          cost_price: number
+          created_at: string
+          emoji: string
+          id: string
+          min_stock: number
+          name: string
+          sale_price: number
+          stock: number
+          updated_at: string
+        }
+        Insert: {
+          category?: string
+          cost_price?: number
+          created_at?: string
+          emoji?: string
+          id?: string
+          min_stock?: number
+          name: string
+          sale_price?: number
+          stock?: number
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          cost_price?: number
+          created_at?: string
+          emoji?: string
+          id?: string
+          min_stock?: number
+          name?: string
+          sale_price?: number
+          stock?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      professionals: {
+        Row: {
+          avatar: string
+          color: string
+          commission: number
+          created_at: string
+          id: string
+          name: string
+          specialty: string
+          updated_at: string
+        }
+        Insert: {
+          avatar?: string
+          color?: string
+          commission?: number
+          created_at?: string
+          id?: string
+          name: string
+          specialty: string
+          updated_at?: string
+        }
+        Update: {
+          avatar?: string
+          color?: string
+          commission?: number
+          created_at?: string
+          id?: string
+          name?: string
+          specialty?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      services: {
+        Row: {
+          category: string
+          created_at: string
+          duration: number
+          id: string
+          name: string
+          price: number
+          updated_at: string
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          duration?: number
+          id?: string
+          name: string
+          price?: number
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          duration?: number
+          id?: string
+          name?: string
+          price?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

@@ -1,6 +1,13 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { Clock, Users, DollarSign, TrendingUp } from 'lucide-react';
-import { professionals, todayAppointments, financialData, type Appointment, type AppointmentStatus } from '@/data/mock';
+import { useProfessionals } from '@/hooks/use-professionals';
+import { useAppointments, useAddAppointment, type Appointment, type AppointmentStatus } from '@/hooks/use-appointments';
+import { useServices } from '@/hooks/use-services';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useToast } from '@/hooks/use-toast';
 
 const statusConfig: Record<AppointmentStatus, { label: string; className: string }> = {
   scheduled: { label: 'Agendado', className: 'bg-status-scheduled/15 text-status-scheduled' },
@@ -30,9 +37,9 @@ function StatCard({ icon: Icon, label, value, sub }: { icon: any; label: string;
 }
 
 function AppointmentCard({ apt }: { apt: Appointment }) {
-  const config = statusConfig[apt.status];
+  const config = statusConfig[apt.status as AppointmentStatus] || statusConfig.scheduled;
   const topPx = (() => {
-    const [h, m] = apt.startTime.split(':').map(Number);
+    const [h, m] = apt.start_time.split(':').map(Number);
     return ((h - 8) * 80) + (m / 60 * 80);
   })();
   const heightPx = (apt.duration / 60) * 80;
@@ -48,15 +55,15 @@ function AppointmentCard({ apt }: { apt: Appointment }) {
       } bg-card shadow-sm`}
       style={{ top: `${topPx}px`, height: `${Math.max(heightPx - 4, 28)}px` }}
     >
-      <p className="text-xs font-medium truncate">{apt.clientName}</p>
+      <p className="text-xs font-medium truncate">{apt.client_name}</p>
       {heightPx > 40 && (
         <>
-          <p className="text-[10px] text-muted-foreground truncate">{apt.serviceName}</p>
+          <p className="text-[10px] text-muted-foreground truncate">{apt.service_name}</p>
           <div className="flex items-center gap-1.5 mt-0.5">
             <span className={`text-[9px] px-1.5 py-0.5 rounded-full font-medium ${config.className}`}>
               {config.label}
             </span>
-            <span className="text-[10px] text-muted-foreground">{apt.startTime}</span>
+            <span className="text-[10px] text-muted-foreground">{apt.start_time}</span>
           </div>
         </>
       )}
@@ -65,41 +72,99 @@ function AppointmentCard({ apt }: { apt: Appointment }) {
 }
 
 export default function Dashboard() {
-  const { todayStats } = financialData;
+  const today = new Date().toISOString().split('T')[0];
+  const { data: professionals = [], isLoading: loadingPros } = useProfessionals();
+  const { data: appointments = [], isLoading: loadingApts } = useAppointments(today);
+  const { data: services = [] } = useServices();
+  const addAppointment = useAddAppointment();
+  const { toast } = useToast();
+
+  const [modalOpen, setModalOpen] = useState(false);
+  const [newApt, setNewApt] = useState({ professionalId: '', serviceId: '', clientName: '', startTime: '09:00' });
+
+  const handleTimeSlotClick = (professionalId: string, time: string) => {
+    setNewApt({ professionalId, serviceId: '', clientName: '', startTime: time });
+    setModalOpen(true);
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const service = services.find(s => s.id === newApt.serviceId);
+    if (!service || !newApt.clientName.trim() || !newApt.professionalId) return;
+    addAppointment.mutate(
+      {
+        professional_id: newApt.professionalId,
+        client_name: newApt.clientName.trim(),
+        service_name: service.name,
+        start_time: newApt.startTime,
+        duration: service.duration,
+        price: Number(service.price),
+        status: 'scheduled',
+        appointment_date: today,
+      },
+      {
+        onSuccess: () => {
+          toast({ title: 'Agendamento criado com sucesso!' });
+          setModalOpen(false);
+        },
+        onError: (err) => {
+          toast({ title: 'Erro ao agendar', description: err.message, variant: 'destructive' });
+        },
+      }
+    );
+  };
 
   const appointmentsByProfessional = useMemo(() => {
     const map = new Map<string, Appointment[]>();
     professionals.forEach(p => map.set(p.id, []));
-    todayAppointments.forEach(a => {
-      map.get(a.professionalId)?.push(a);
+    appointments.forEach(a => {
+      map.get(a.professional_id)?.push(a);
     });
     return map;
-  }, []);
+  }, [professionals, appointments]);
+
+  const completedCount = appointments.filter(a => a.status === 'completed').length;
+  const totalRevenue = appointments.filter(a => a.status === 'completed').reduce((s, a) => s + Number(a.price), 0);
+  const avgTicket = completedCount > 0 ? Math.round(totalRevenue / completedCount) : 0;
+
+  const isLoading = loadingPros || loadingApts;
+
+  if (isLoading) {
+    return (
+      <div className="p-4 md:p-6 space-y-6 max-w-[1600px] mx-auto">
+        <div className="animate-pulse space-y-4">
+          <div className="h-8 bg-muted rounded w-32" />
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+            {[1, 2, 3, 4].map(i => <div key={i} className="h-20 bg-muted rounded-lg" />)}
+          </div>
+          <div className="h-96 bg-muted rounded-xl" />
+        </div>
+      </div>
+    );
+  }
+
+  const dateStr = new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
 
   return (
     <div className="p-4 md:p-6 space-y-6 max-w-[1600px] mx-auto">
-      {/* Header */}
       <div className="animate-fade-in-up">
         <h1 className="text-2xl font-bold">Agenda</h1>
-        <p className="text-sm text-muted-foreground">Terça-feira, 20 de Março 2026</p>
+        <p className="text-sm text-muted-foreground capitalize">{dateStr}</p>
       </div>
 
-      {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        <StatCard icon={DollarSign} label="Faturamento Hoje" value={`R$ ${todayStats.revenue.toLocaleString('pt-BR')}`} />
-        <StatCard icon={Clock} label="Agendamentos" value={String(todayStats.appointments)} sub="4 finalizados" />
-        <StatCard icon={TrendingUp} label="Ticket Médio" value={`R$ ${todayStats.avgTicket}`} />
-        <StatCard icon={Users} label="Ocupação" value={`${todayStats.occupancy}%`} />
+        <StatCard icon={DollarSign} label="Faturamento Hoje" value={`R$ ${totalRevenue.toLocaleString('pt-BR')}`} />
+        <StatCard icon={Clock} label="Agendamentos" value={String(appointments.length)} sub={`${completedCount} finalizados`} />
+        <StatCard icon={TrendingUp} label="Ticket Médio" value={`R$ ${avgTicket}`} />
+        <StatCard icon={Users} label="Profissionais" value={String(professionals.length)} />
       </div>
 
-      {/* Timeline */}
       <div className="bg-card rounded-xl border border-border overflow-hidden animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
         <div className="p-4 border-b border-border">
           <h2 className="font-semibold">Timeline de Hoje</h2>
         </div>
         <div className="overflow-x-auto">
           <div className="min-w-[700px]">
-            {/* Professional headers */}
             <div className="grid border-b border-border" style={{ gridTemplateColumns: `64px repeat(${professionals.length}, 1fr)` }}>
               <div className="p-3 text-xs text-muted-foreground">Hora</div>
               {professionals.map(p => (
@@ -120,27 +185,29 @@ export default function Dashboard() {
               ))}
             </div>
 
-            {/* Time grid */}
             <div className="relative grid" style={{ gridTemplateColumns: `64px repeat(${professionals.length}, 1fr)` }}>
-              {/* Time labels */}
               <div className="relative">
-                {timeSlots.map((slot, i) => (
+                {timeSlots.map(slot => (
                   <div key={slot} className="h-20 px-3 flex items-start pt-1 border-b border-border/50">
                     <span className="text-[10px] text-muted-foreground tabular-nums">{slot}</span>
                   </div>
                 ))}
               </div>
 
-              {/* Professional columns */}
               {professionals.map(p => (
                 <div key={p.id} className="relative border-l border-border">
                   {timeSlots.map(slot => (
-                    <div key={slot} className="h-20 border-b border-border/50" />
+                    <div
+                      key={slot}
+                      className="h-20 border-b border-border/50 cursor-pointer hover:bg-secondary/20 transition-colors"
+                      onClick={() => handleTimeSlotClick(p.id, slot)}
+                    />
                   ))}
-                  {/* Appointments overlay */}
-                  <div className="absolute inset-0">
+                  <div className="absolute inset-0 pointer-events-none">
                     {(appointmentsByProfessional.get(p.id) || []).map(apt => (
-                      <AppointmentCard key={apt.id} apt={apt} />
+                      <div key={apt.id} className="pointer-events-auto">
+                        <AppointmentCard apt={apt} />
+                      </div>
                     ))}
                   </div>
                 </div>
@@ -149,6 +216,43 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
+
+      <Dialog open={modalOpen} onOpenChange={setModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Novo Agendamento</DialogTitle>
+            <DialogDescription>
+              {professionals.find(p => p.id === newApt.professionalId)?.name} — {newApt.startTime}
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <label className="text-sm font-medium">Cliente</label>
+              <Input value={newApt.clientName} onChange={e => setNewApt({ ...newApt, clientName: e.target.value })} placeholder="Nome do cliente" required />
+            </div>
+            <div>
+              <label className="text-sm font-medium">Serviço</label>
+              <Select value={newApt.serviceId} onValueChange={v => setNewApt({ ...newApt, serviceId: v })}>
+                <SelectTrigger><SelectValue placeholder="Selecione um serviço" /></SelectTrigger>
+                <SelectContent>
+                  {services.map(s => (
+                    <SelectItem key={s.id} value={s.id}>
+                      {s.name} — R$ {Number(s.price).toFixed(2)} ({s.duration}min)
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <label className="text-sm font-medium">Horário</label>
+              <Input type="time" value={newApt.startTime} onChange={e => setNewApt({ ...newApt, startTime: e.target.value })} />
+            </div>
+            <Button type="submit" className="w-full" disabled={addAppointment.isPending || !newApt.serviceId}>
+              {addAppointment.isPending ? 'Salvando...' : 'Agendar'}
+            </Button>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -1,19 +1,20 @@
 import { useState, useMemo } from 'react';
 import { Search, Plus, Minus, ShoppingCart, X, UserPlus } from 'lucide-react';
-import { products, type Product } from '@/data/mock';
+import { useProducts, type Product } from '@/hooks/use-products';
 
 interface CartItem {
   product: Product;
   qty: number;
 }
 
-const categories = ['Todos', ...Array.from(new Set(products.map(p => p.category)))];
-
 export default function PDV() {
+  const { data: products = [], isLoading } = useProducts();
   const [search, setSearch] = useState('');
   const [activeCategory, setActiveCategory] = useState('Todos');
   const [cart, setCart] = useState<CartItem[]>([]);
   const [clientName, setClientName] = useState('');
+
+  const categories = useMemo(() => ['Todos', ...Array.from(new Set(products.map(p => p.category)))], [products]);
 
   const filtered = useMemo(() => {
     return products.filter(p => {
@@ -21,7 +22,7 @@ export default function PDV() {
       const matchCat = activeCategory === 'Todos' || p.category === activeCategory;
       return matchSearch && matchCat;
     });
-  }, [search, activeCategory]);
+  }, [products, search, activeCategory]);
 
   const addToCart = (product: Product) => {
     setCart(prev => {
@@ -43,18 +44,29 @@ export default function PDV() {
     setCart(prev => prev.filter(i => i.product.id !== productId));
   };
 
-  const total = cart.reduce((sum, i) => sum + i.product.salePrice * i.qty, 0);
+  const total = cart.reduce((sum, i) => sum + i.product.sale_price * i.qty, 0);
+
+  if (isLoading) {
+    return (
+      <div className="p-4 md:p-6">
+        <div className="animate-pulse space-y-4">
+          <div className="h-8 bg-muted rounded w-32" />
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+            {[1, 2, 3, 4, 5, 6].map(i => <div key={i} className="h-28 bg-muted rounded-xl" />)}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col lg:flex-row h-full">
-      {/* Products grid */}
       <div className="flex-1 p-4 md:p-6 space-y-4 overflow-y-auto">
         <div className="animate-fade-in-up">
           <h1 className="text-2xl font-bold">Cafeteria</h1>
           <p className="text-sm text-muted-foreground">Ponto de venda rápido</p>
         </div>
 
-        {/* Search */}
         <div className="relative animate-fade-in-up" style={{ animationDelay: '0.05s' }}>
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <input
@@ -66,7 +78,6 @@ export default function PDV() {
           />
         </div>
 
-        {/* Categories */}
         <div className="flex gap-2 overflow-x-auto pb-1 animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
           {categories.map(cat => (
             <button
@@ -83,7 +94,6 @@ export default function PDV() {
           ))}
         </div>
 
-        {/* Products */}
         <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3">
           {filtered.map((product, i) => (
             <button
@@ -96,9 +106,9 @@ export default function PDV() {
               <p className="font-medium text-sm mt-2">{product.name}</p>
               <p className="text-xs text-muted-foreground">{product.category}</p>
               <p className="text-sm font-semibold mt-1 gold-text">
-                R$ {product.salePrice.toFixed(2)}
+                R$ {product.sale_price.toFixed(2)}
               </p>
-              {product.stock <= product.minStock && (
+              {product.stock <= product.min_stock && (
                 <span className="text-[10px] text-status-delayed font-medium">Estoque baixo</span>
               )}
             </button>
@@ -106,7 +116,6 @@ export default function PDV() {
         </div>
       </div>
 
-      {/* Cart sidebar */}
       <div className="lg:w-80 border-t lg:border-t-0 lg:border-l border-border bg-card flex flex-col">
         <div className="p-4 border-b border-border">
           <div className="flex items-center gap-2">
@@ -120,7 +129,6 @@ export default function PDV() {
           </div>
         </div>
 
-        {/* Client link */}
         <div className="p-3 border-b border-border">
           <div className="flex items-center gap-2">
             <UserPlus className="w-4 h-4 text-muted-foreground" />
@@ -134,7 +142,6 @@ export default function PDV() {
           </div>
         </div>
 
-        {/* Items */}
         <div className="flex-1 overflow-y-auto p-3 space-y-2">
           {cart.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-32 text-muted-foreground">
@@ -148,7 +155,7 @@ export default function PDV() {
                 <div className="flex-1 min-w-0">
                   <p className="text-xs font-medium truncate">{item.product.name}</p>
                   <p className="text-[10px] text-muted-foreground">
-                    R$ {item.product.salePrice.toFixed(2)}
+                    R$ {item.product.sale_price.toFixed(2)}
                   </p>
                 </div>
                 <div className="flex items-center gap-1.5">
@@ -177,7 +184,6 @@ export default function PDV() {
           )}
         </div>
 
-        {/* Total */}
         <div className="p-4 border-t border-border space-y-3">
           <div className="flex justify-between items-center">
             <span className="text-sm text-muted-foreground">Total</span>

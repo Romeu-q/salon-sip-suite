@@ -17,44 +17,76 @@ export type Database = {
       appointments: {
         Row: {
           appointment_date: string
+          client_id: string | null
           client_name: string
+          combo_id: string | null
           created_at: string
           duration: number
+          end_time: string | null
           id: string
+          notes: string | null
           price: number
           professional_id: string
+          service_id: string | null
           service_name: string
           start_time: string
           status: string
+          tenant_id: string | null
           updated_at: string
         }
         Insert: {
           appointment_date?: string
+          client_id?: string | null
           client_name: string
+          combo_id?: string | null
           created_at?: string
           duration: number
+          end_time?: string | null
           id?: string
+          notes?: string | null
           price?: number
           professional_id: string
+          service_id?: string | null
           service_name: string
           start_time: string
           status?: string
+          tenant_id?: string | null
           updated_at?: string
         }
         Update: {
           appointment_date?: string
+          client_id?: string | null
           client_name?: string
+          combo_id?: string | null
           created_at?: string
           duration?: number
+          end_time?: string | null
           id?: string
+          notes?: string | null
           price?: number
           professional_id?: string
+          service_id?: string | null
           service_name?: string
           start_time?: string
           status?: string
+          tenant_id?: string | null
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "appointments_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appointments_combo_id_fkey"
+            columns: ["combo_id"]
+            isOneToOne: false
+            referencedRelation: "service_combos"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "appointments_professional_id_fkey"
             columns: ["professional_id"]
@@ -62,49 +94,402 @@ export type Database = {
             referencedRelation: "professionals"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "appointments_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appointments_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      clients: {
+        Row: {
+          created_at: string
+          email: string | null
+          id: string
+          name: string
+          notes: string | null
+          phone: string | null
+          tenant_id: string
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          name: string
+          notes?: string | null
+          phone?: string | null
+          tenant_id: string
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          name?: string
+          notes?: string | null
+          phone?: string | null
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "clients_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      financial_entries: {
+        Row: {
+          amount: number
+          category: string | null
+          created_at: string
+          date: string
+          description: string | null
+          id: string
+          order_id: string | null
+          tenant_id: string
+          type: Database["public"]["Enums"]["financial_type"]
+        }
+        Insert: {
+          amount?: number
+          category?: string | null
+          created_at?: string
+          date?: string
+          description?: string | null
+          id?: string
+          order_id?: string | null
+          tenant_id: string
+          type: Database["public"]["Enums"]["financial_type"]
+        }
+        Update: {
+          amount?: number
+          category?: string | null
+          created_at?: string
+          date?: string
+          description?: string | null
+          id?: string
+          order_id?: string | null
+          tenant_id?: string
+          type?: Database["public"]["Enums"]["financial_type"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "financial_entries_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financial_entries_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      fiscal_settings: {
+        Row: {
+          api_key_encrypted: string | null
+          certificate_path: string | null
+          created_at: string
+          environment: string | null
+          id: string
+          nfce_provider: string | null
+          settings: Json | null
+          tenant_id: string
+        }
+        Insert: {
+          api_key_encrypted?: string | null
+          certificate_path?: string | null
+          created_at?: string
+          environment?: string | null
+          id?: string
+          nfce_provider?: string | null
+          settings?: Json | null
+          tenant_id: string
+        }
+        Update: {
+          api_key_encrypted?: string | null
+          certificate_path?: string | null
+          created_at?: string
+          environment?: string | null
+          id?: string
+          nfce_provider?: string | null
+          settings?: Json | null
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fiscal_settings_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      order_product_items: {
+        Row: {
+          id: string
+          order_id: string
+          product_id: string | null
+          quantity: number
+          unit_price: number
+        }
+        Insert: {
+          id?: string
+          order_id: string
+          product_id?: string | null
+          quantity?: number
+          unit_price?: number
+        }
+        Update: {
+          id?: string
+          order_id?: string
+          product_id?: string | null
+          quantity?: number
+          unit_price?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_product_items_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_product_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      order_service_items: {
+        Row: {
+          appointment_id: string | null
+          id: string
+          order_id: string
+          price: number
+          professional_id: string | null
+          service_id: string | null
+        }
+        Insert: {
+          appointment_id?: string | null
+          id?: string
+          order_id: string
+          price?: number
+          professional_id?: string | null
+          service_id?: string | null
+        }
+        Update: {
+          appointment_id?: string | null
+          id?: string
+          order_id?: string
+          price?: number
+          professional_id?: string | null
+          service_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_service_items_appointment_id_fkey"
+            columns: ["appointment_id"]
+            isOneToOne: false
+            referencedRelation: "appointments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_service_items_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_service_items_professional_id_fkey"
+            columns: ["professional_id"]
+            isOneToOne: false
+            referencedRelation: "professionals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_service_items_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      orders: {
+        Row: {
+          client_id: string | null
+          closed_at: string | null
+          created_at: string
+          discount: number | null
+          id: string
+          payment_method: string | null
+          professional_commission: number | null
+          status: Database["public"]["Enums"]["order_status"]
+          tenant_id: string
+          total: number | null
+        }
+        Insert: {
+          client_id?: string | null
+          closed_at?: string | null
+          created_at?: string
+          discount?: number | null
+          id?: string
+          payment_method?: string | null
+          professional_commission?: number | null
+          status?: Database["public"]["Enums"]["order_status"]
+          tenant_id: string
+          total?: number | null
+        }
+        Update: {
+          client_id?: string | null
+          closed_at?: string | null
+          created_at?: string
+          discount?: number | null
+          id?: string
+          payment_method?: string | null
+          professional_commission?: number | null
+          status?: Database["public"]["Enums"]["order_status"]
+          tenant_id?: string
+          total?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "orders_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "orders_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      product_categories: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          sort_order: number | null
+          tenant_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          sort_order?: number | null
+          tenant_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          sort_order?: number | null
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_categories_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
         ]
       }
       products: {
         Row: {
+          active: boolean
           category: string
-          cost_price: number
+          category_id: string | null
+          cost_price: number | null
           created_at: string
           emoji: string
           id: string
-          min_stock: number
+          image_url: string | null
+          min_stock: number | null
           name: string
-          sale_price: number
-          stock: number
+          sell_price: number | null
+          stock_qty: number
+          tenant_id: string | null
           updated_at: string
         }
         Insert: {
+          active?: boolean
           category?: string
-          cost_price?: number
+          category_id?: string | null
+          cost_price?: number | null
           created_at?: string
           emoji?: string
           id?: string
-          min_stock?: number
+          image_url?: string | null
+          min_stock?: number | null
           name: string
-          sale_price?: number
-          stock?: number
+          sell_price?: number | null
+          stock_qty?: number
+          tenant_id?: string | null
           updated_at?: string
         }
         Update: {
+          active?: boolean
           category?: string
-          cost_price?: number
+          category_id?: string | null
+          cost_price?: number | null
           created_at?: string
           emoji?: string
           id?: string
-          min_stock?: number
+          image_url?: string | null
+          min_stock?: number | null
           name?: string
-          sale_price?: number
-          stock?: number
+          sell_price?: number | null
+          stock_qty?: number
+          tenant_id?: string | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "products_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "product_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "products_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       professionals: {
         Row: {
+          active: boolean
           avatar: string
           color: string
           commission: number
@@ -112,9 +497,12 @@ export type Database = {
           id: string
           name: string
           specialty: string
+          tenant_id: string | null
           updated_at: string
+          work_schedule: Json | null
         }
         Insert: {
+          active?: boolean
           avatar?: string
           color?: string
           commission?: number
@@ -122,9 +510,12 @@ export type Database = {
           id?: string
           name: string
           specialty: string
+          tenant_id?: string | null
           updated_at?: string
+          work_schedule?: Json | null
         }
         Update: {
+          active?: boolean
           avatar?: string
           color?: string
           commission?: number
@@ -132,37 +523,230 @@ export type Database = {
           id?: string
           name?: string
           specialty?: string
+          tenant_id?: string | null
           updated_at?: string
+          work_schedule?: Json | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "professionals_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
       }
-      services: {
+      profiles: {
         Row: {
-          category: string
           created_at: string
-          duration: number
+          full_name: string | null
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          tenant_id: string
+        }
+        Insert: {
+          created_at?: string
+          full_name?: string | null
+          id: string
+          role?: Database["public"]["Enums"]["app_role"]
+          tenant_id: string
+        }
+        Update: {
+          created_at?: string
+          full_name?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profiles_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      service_categories: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          sort_order: number | null
+          tenant_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          sort_order?: number | null
+          tenant_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          sort_order?: number | null
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_categories_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      service_combo_items: {
+        Row: {
+          combo_id: string
+          id: string
+          service_id: string
+          sort_order: number | null
+        }
+        Insert: {
+          combo_id: string
+          id?: string
+          service_id: string
+          sort_order?: number | null
+        }
+        Update: {
+          combo_id?: string
+          id?: string
+          service_id?: string
+          sort_order?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_combo_items_combo_id_fkey"
+            columns: ["combo_id"]
+            isOneToOne: false
+            referencedRelation: "service_combos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_combo_items_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      service_combos: {
+        Row: {
+          active: boolean
+          created_at: string
           id: string
           name: string
           price: number
-          updated_at: string
+          tenant_id: string
         }
         Insert: {
-          category?: string
+          active?: boolean
           created_at?: string
-          duration?: number
           id?: string
           name: string
           price?: number
-          updated_at?: string
+          tenant_id: string
         }
         Update: {
-          category?: string
+          active?: boolean
           created_at?: string
-          duration?: number
           id?: string
           name?: string
           price?: number
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_combos_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      services: {
+        Row: {
+          active: boolean
+          category: string
+          category_id: string | null
+          created_at: string
+          duration_minutes: number
+          id: string
+          name: string
+          price: number
+          tenant_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          category?: string
+          category_id?: string | null
+          created_at?: string
+          duration_minutes?: number
+          id?: string
+          name: string
+          price?: number
+          tenant_id?: string | null
           updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          category?: string
+          category_id?: string | null
+          created_at?: string
+          duration_minutes?: number
+          id?: string
+          name?: string
+          price?: number
+          tenant_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "services_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "service_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "services_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tenants: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          settings: Json | null
+          slug: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          settings?: Json | null
+          slug: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          settings?: Json | null
+          slug?: string
         }
         Relationships: []
       }
@@ -171,10 +755,18 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_user_tenant_id: { Args: never; Returns: string }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "owner" | "admin" | "staff"
+      appointment_status:
+        | "scheduled"
+        | "in_salon"
+        | "delayed"
+        | "finished"
+        | "cancelled"
+      financial_type: "income" | "expense"
+      order_status: "open" | "closed" | "cancelled"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -301,6 +893,17 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["owner", "admin", "staff"],
+      appointment_status: [
+        "scheduled",
+        "in_salon",
+        "delayed",
+        "finished",
+        "cancelled",
+      ],
+      financial_type: ["income", "expense"],
+      order_status: ["open", "closed", "cancelled"],
+    },
   },
 } as const

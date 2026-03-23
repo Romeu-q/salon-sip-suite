@@ -11,9 +11,9 @@ import { useToast } from '@/hooks/use-toast';
 
 const statusConfig: Record<AppointmentStatus, { label: string; className: string }> = {
   scheduled: { label: 'Agendado', className: 'bg-status-scheduled/15 text-status-scheduled' },
-  'in-salon': { label: 'No Salão', className: 'bg-status-in-salon/15 text-status-in-salon' },
+  in_salon: { label: 'No Salão', className: 'bg-status-in-salon/15 text-status-in-salon' },
   delayed: { label: 'Atrasado', className: 'bg-status-delayed/15 text-status-delayed' },
-  completed: { label: 'Finalizado', className: 'bg-status-completed/15 text-status-completed' },
+  finished: { label: 'Finalizado', className: 'bg-status-completed/15 text-status-completed' },
   cancelled: { label: 'Cancelado', className: 'bg-status-cancelled/15 text-status-cancelled' },
 };
 

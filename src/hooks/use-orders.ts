@@ -11,7 +11,7 @@ export function useOrders(status?: string) {
     queryKey: ['orders', status, tenantId],
     queryFn: async () => {
       let query = supabase.from('orders').select('*');
-      if (status) query = query.eq('status', status);
+      if (status) query = query.eq('status', status as any);
       const { data, error } = await query.order('created_at', { ascending: false });
       if (error) throw error;
       return data as Order[];

@@ -97,7 +97,7 @@ export default function Dashboard() {
         client_name: newApt.clientName.trim(),
         service_name: service.name,
         start_time: newApt.startTime,
-        duration: service.duration,
+        duration: service.duration_minutes,
         price: Number(service.price),
         status: 'scheduled',
         appointment_date: today,
@@ -237,7 +237,7 @@ export default function Dashboard() {
                 <SelectContent>
                   {services.map(s => (
                     <SelectItem key={s.id} value={s.id}>
-                      {s.name} — R$ {Number(s.price).toFixed(2)} ({s.duration}min)
+                      {s.name} — R$ {Number(s.price).toFixed(2)} ({s.duration_minutes}min)
                     </SelectItem>
                   ))}
                 </SelectContent>

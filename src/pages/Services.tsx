@@ -22,7 +22,7 @@ export default function Services() {
       {
         name: form.name.trim(),
         price: Number(form.price) || 0,
-        duration: Number(form.duration) || 30,
+        duration_minutes: Number(form.duration) || 30,
         category: form.category.trim(),
       },
       {
@@ -66,7 +66,7 @@ export default function Services() {
                   <p className="text-sm font-medium">{s.name}</p>
                   <div className="flex items-center gap-3 mt-0.5">
                     <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                      <Clock className="w-3 h-3" /> {s.duration}min
+                      <Clock className="w-3 h-3" /> {s.duration_minutes}min
                     </span>
                   </div>
                 </div>

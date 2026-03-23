@@ -44,7 +44,7 @@ export default function PDV() {
     setCart(prev => prev.filter(i => i.product.id !== productId));
   };
 
-  const total = cart.reduce((sum, i) => sum + i.product.sale_price * i.qty, 0);
+  const total = cart.reduce((sum, i) => sum + i.product.sell_price * i.qty, 0);
 
   if (isLoading) {
     return (
@@ -106,9 +106,9 @@ export default function PDV() {
               <p className="font-medium text-sm mt-2">{product.name}</p>
               <p className="text-xs text-muted-foreground">{product.category}</p>
               <p className="text-sm font-semibold mt-1 gold-text">
-                R$ {product.sale_price.toFixed(2)}
+                R$ {product.sell_price.toFixed(2)}
               </p>
-              {product.stock <= product.min_stock && (
+              {product.stock_qty <= product.min_stock && (
                 <span className="text-[10px] text-status-delayed font-medium">Estoque baixo</span>
               )}
             </button>
@@ -155,7 +155,7 @@ export default function PDV() {
                 <div className="flex-1 min-w-0">
                   <p className="text-xs font-medium truncate">{item.product.name}</p>
                   <p className="text-[10px] text-muted-foreground">
-                    R$ {item.product.sale_price.toFixed(2)}
+                    R$ {item.product.sell_price.toFixed(2)}
                   </p>
                 </div>
                 <div className="flex items-center gap-1.5">

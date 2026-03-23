@@ -48,8 +48,8 @@ function AppointmentCard({ apt }: { apt: Appointment }) {
     <div
       className={`absolute left-1 right-1 rounded-lg px-2.5 py-1.5 overflow-hidden cursor-pointer transition-shadow hover:shadow-md border-l-[3px] ${
         apt.status === 'delayed' ? 'border-l-status-delayed animate-pulse' :
-        apt.status === 'completed' ? 'border-l-status-completed' :
-        apt.status === 'in-salon' ? 'border-l-status-in-salon' :
+        apt.status === 'finished' ? 'border-l-status-completed' :
+        apt.status === 'in_salon' ? 'border-l-status-in-salon' :
         apt.status === 'cancelled' ? 'border-l-status-cancelled' :
         'border-l-status-scheduled'
       } bg-card shadow-sm`}
@@ -123,8 +123,8 @@ export default function Dashboard() {
     return map;
   }, [professionals, appointments]);
 
-  const completedCount = appointments.filter(a => a.status === 'completed').length;
-  const totalRevenue = appointments.filter(a => a.status === 'completed').reduce((s, a) => s + Number(a.price), 0);
+  const completedCount = appointments.filter(a => a.status === 'finished').length;
+  const totalRevenue = appointments.filter(a => a.status === 'finished').reduce((s, a) => s + Number(a.price), 0);
   const avgTicket = completedCount > 0 ? Math.round(totalRevenue / completedCount) : 0;
 
   const isLoading = loadingPros || loadingApts;

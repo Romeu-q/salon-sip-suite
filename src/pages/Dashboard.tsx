@@ -11,9 +11,9 @@ import { useToast } from '@/hooks/use-toast';
 
 const statusConfig: Record<AppointmentStatus, { label: string; className: string }> = {
   scheduled: { label: 'Agendado', className: 'bg-status-scheduled/15 text-status-scheduled' },
-  'in-salon': { label: 'No Salão', className: 'bg-status-in-salon/15 text-status-in-salon' },
+  in_salon: { label: 'No Salão', className: 'bg-status-in-salon/15 text-status-in-salon' },
   delayed: { label: 'Atrasado', className: 'bg-status-delayed/15 text-status-delayed' },
-  completed: { label: 'Finalizado', className: 'bg-status-completed/15 text-status-completed' },
+  finished: { label: 'Finalizado', className: 'bg-status-completed/15 text-status-completed' },
   cancelled: { label: 'Cancelado', className: 'bg-status-cancelled/15 text-status-cancelled' },
 };
 
@@ -48,8 +48,8 @@ function AppointmentCard({ apt }: { apt: Appointment }) {
     <div
       className={`absolute left-1 right-1 rounded-lg px-2.5 py-1.5 overflow-hidden cursor-pointer transition-shadow hover:shadow-md border-l-[3px] ${
         apt.status === 'delayed' ? 'border-l-status-delayed animate-pulse' :
-        apt.status === 'completed' ? 'border-l-status-completed' :
-        apt.status === 'in-salon' ? 'border-l-status-in-salon' :
+        apt.status === 'finished' ? 'border-l-status-completed' :
+        apt.status === 'in_salon' ? 'border-l-status-in-salon' :
         apt.status === 'cancelled' ? 'border-l-status-cancelled' :
         'border-l-status-scheduled'
       } bg-card shadow-sm`}
@@ -97,7 +97,7 @@ export default function Dashboard() {
         client_name: newApt.clientName.trim(),
         service_name: service.name,
         start_time: newApt.startTime,
-        duration: service.duration,
+        duration: service.duration_minutes,
         price: Number(service.price),
         status: 'scheduled',
         appointment_date: today,
@@ -123,8 +123,8 @@ export default function Dashboard() {
     return map;
   }, [professionals, appointments]);
 
-  const completedCount = appointments.filter(a => a.status === 'completed').length;
-  const totalRevenue = appointments.filter(a => a.status === 'completed').reduce((s, a) => s + Number(a.price), 0);
+  const completedCount = appointments.filter(a => a.status === 'finished').length;
+  const totalRevenue = appointments.filter(a => a.status === 'finished').reduce((s, a) => s + Number(a.price), 0);
   const avgTicket = completedCount > 0 ? Math.round(totalRevenue / completedCount) : 0;
 
   const isLoading = loadingPros || loadingApts;
@@ -237,7 +237,7 @@ export default function Dashboard() {
                 <SelectContent>
                   {services.map(s => (
                     <SelectItem key={s.id} value={s.id}>
-                      {s.name} — R$ {Number(s.price).toFixed(2)} ({s.duration}min)
+                      {s.name} — R$ {Number(s.price).toFixed(2)} ({s.duration_minutes}min)
                     </SelectItem>
                   ))}
                 </SelectContent>

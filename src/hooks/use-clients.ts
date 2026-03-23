@@ -3,32 +3,32 @@ import { supabase } from '@/integrations/supabase/client';
 import type { Tables, TablesInsert } from '@/integrations/supabase/types';
 import { useAuth } from './use-auth';
 
-export type Service = Tables<'services'>;
+export type Client = Tables<'clients'>;
 
-export function useServices() {
+export function useClients() {
   const { tenantId } = useAuth();
   return useQuery({
-    queryKey: ['services', tenantId],
+    queryKey: ['clients', tenantId],
     queryFn: async () => {
-      const { data, error } = await supabase.from('services').select('*').order('category, name');
+      const { data, error } = await supabase.from('clients').select('*').order('name');
       if (error) throw error;
-      return data as Service[];
+      return data as Client[];
     },
     enabled: !!tenantId,
   });
 }
 
-export function useAddService() {
+export function useAddClient() {
   const queryClient = useQueryClient();
   const { tenantId } = useAuth();
   return useMutation({
-    mutationFn: async (service: Omit<TablesInsert<'services'>, 'tenant_id'>) => {
-      const { data, error } = await supabase.from('services').insert({ ...service, tenant_id: tenantId! }).select().single();
+    mutationFn: async (client: Omit<TablesInsert<'clients'>, 'tenant_id'>) => {
+      const { data, error } = await supabase.from('clients').insert({ ...client, tenant_id: tenantId! }).select().single();
       if (error) throw error;
       return data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['services'] });
+      queryClient.invalidateQueries({ queryKey: ['clients'] });
     },
   });
 }
